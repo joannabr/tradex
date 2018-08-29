@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.springframework.org/schema/mvc">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script>
+    function sendData() {
+            var curr1 = document.getElementById("currency1").value;
+            var curr2 = document.getElementById("currency2").value;
+
+            window.location.href = "/" + curr1 + "/" + curr2;
+        }
+
+        function keyPressOne() {
+            var curr1 = document.getElementById("currency1").value;
+            callToServer(curr1);
+        }
+        function keyPressTwo() {
+            var curr2 = document.getElementById("currency2").value;
+            callToServer(curr2);
+        }
+
+        function callToServer(typedText) {
+            console.log(typedText);
+            $.ajax({
+                url: "/api/currency/" + typedText,
+                type: "get", //send it through get method
+                success: function(response) {
+                        var list = document.getElementById('hints1');
+                        list.innerHTML = "";
+
+                        response.forEach(function (oneElement) {
+                            var option = document.createElement('option');
+                            option.value = oneElement;
+                            list.appendChild(option);
+                        })
+                },
+                error: function(xhr) {
+                }
+            });
+        }
+</script>
+</head>
+<body>
+<canvas id="currencyChart" width="200px" height="50px"></canvas>
+
+<div style="text-align: center;">
+    <input onkeyup="keyPressOne()"  id="currency1" list="hints1" placeholder="Podaj walutę">
+    <datalist id="hints1"></datalist>
+    <input onkeyup="keyPressTwo()"  id="currency2" list="hints1" placeholder="Podaj walutę">
+    <datalist id="hints2"></datalist>
+    <button onclick="sendData()">Wyślij</button>
+</div>
+
+    <script th:inline="javascript">
+    var ctx = document.getElementById("currencyChart").getContext('2d');
+    var myChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: [[${labels}]],
+            datasets: [{
+                label: [[${currencyNameOne}]],
+                data: [[${data1}]],
+                backgroundColor: [
+                'rgba(223, 0, 0, 0.2)']
+            },{
+                backgroundColor: "#c5c9cc",
+                label: [[${currencyNameTwo}]],
+                data: [[${data2}]],
+                backgroundColor: [
+                'rgba(40, 72, 246, 0.2)']
+            }
+            ]
+        },
+        options: {
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero:false
+                    }
+                }]
+            }
+        }
+    });
+    </script>
+</body>
+</html>
